@@ -61,7 +61,22 @@ for (let i = 0; i < imageCount; i++) {
 }
 
 const copyUrl = async (url) => {
-  await navigator.clipboard.writeText(url)
+  // 修复剪切功能在非https环境下不能用的问题
+  if (window.isSecureContext && navigator.clipboard) {
+    await navigator.clipboard.writeText(url)
+  } else {
+    const textArea = document.createElement("textarea");
+    textArea.value = url;
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+      document.execCommand('copy');
+    } catch (err) {
+      console.error('Unable to copy to clipboard', err);
+    }
+    document.body.removeChild(textArea);
+  }
   // alert('你已成功复制此图片的地址')
   copyDialogVisiable.value = true
 }
